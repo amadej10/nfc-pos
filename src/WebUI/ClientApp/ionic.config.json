@@ -1,0 +1,7 @@
+{
+  "name": "NFC POS",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
