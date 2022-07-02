@@ -1,4 +1,4 @@
-﻿using nfc_pos.Application.Common.Interfaces;
+using nfc_pos.Application.Common.Interfaces;
 using nfc_pos.Application.Common.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -29,10 +29,14 @@ public class IdentityService : IIdentityService
         return user.UserName;
     }
 
-    public async Task<(Result Result, string UserId)> CreateUserAsync(string userName, string password)
+    public async Task<(Result Result, string UserId)> CreateUserAsync(string userName, string Name, string Surname, string Description, string NfcId, string password)
     {
         var user = new ApplicationUser
         {
+            Name = Name,
+            Surname = Surname,
+            NfcId = NfcId,
+            Description = Description,
             UserName = userName,
             Email = userName,
         };
