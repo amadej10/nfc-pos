@@ -82,4 +82,14 @@ public class IdentityService : IIdentityService
 
         return result.ToApplicationResult();
     }
+
+    public async Task<(string Name, decimal Balance)> GetUserNameAndBalanceAsync(string nfcId)
+    {
+        var user = await _userManager.Users.FirstAsync(u => u.NfcId == nfcId);
+
+        string FullName = $"{user.Name} {user.Surname}";
+
+        return (FullName, user.Balance);
+    }
+
 }

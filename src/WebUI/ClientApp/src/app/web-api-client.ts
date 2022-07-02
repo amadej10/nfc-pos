@@ -582,6 +582,7 @@ export class TodoListsClient implements ITodoListsClient {
 
 export interface IUsersClient {
     create(command: CreateUserCommand): Observable<string>;
+    getUserNameAndBalance(nfcId: string | null | undefined): Observable<UserVm>;
 }
 
 @Injectable({
@@ -640,6 +641,56 @@ export class UsersClient implements IUsersClient {
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
                 result200 = resultData200 !== undefined ? resultData200 : <any>null;
     
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    getUserNameAndBalance(nfcId: string | null | undefined): Observable<UserVm> {
+        let url_ = this.baseUrl + "/api/Users?";
+        if (nfcId !== undefined && nfcId !== null)
+            url_ += "NfcId=" + encodeURIComponent("" + nfcId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetUserNameAndBalance(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetUserNameAndBalance(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<UserVm>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<UserVm>;
+        }));
+    }
+
+    protected processGetUserNameAndBalance(response: HttpResponseBase): Observable<UserVm> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserVm.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -1316,6 +1367,46 @@ export interface ICreateUserCommand {
     surname?: string;
     nfcId?: string | undefined;
     description?: string | undefined;
+    balance?: number;
+}
+
+export class UserVm implements IUserVm {
+    fullName?: string;
+    balance?: number;
+
+    constructor(data?: IUserVm) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.fullName = _data["fullName"];
+            this.balance = _data["balance"];
+        }
+    }
+
+    static fromJS(data: any): UserVm {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserVm();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["fullName"] = this.fullName;
+        data["balance"] = this.balance;
+        return data;
+    }
+}
+
+export interface IUserVm {
+    fullName?: string;
     balance?: number;
 }
 
