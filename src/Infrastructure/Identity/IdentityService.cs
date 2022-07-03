@@ -1,4 +1,4 @@
-using nfc_pos.Application.Common.Interfaces;
+﻿using nfc_pos.Application.Common.Interfaces;
 using nfc_pos.Application.Common.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -92,4 +92,30 @@ public class IdentityService : IIdentityService
         return (FullName, user.Balance);
     }
 
+    public async Task<decimal> TopUpBalanceAsync(string nfcId, decimal Balance)
+    {
+        var user = await _userManager.Users.FirstAsync(u => u.NfcId == nfcId);
+
+        user.Balance = user.Balance + Balance;
+
+        await _userManager.UpdateAsync(user);
+
+
+        return user.Balance;
+    }
+
+    public async Task<decimal> DeductBalanceAsync(string nfcId, decimal Balance)
+    {
+        var user = await _userManager.Users.FirstAsync(u => u.NfcId == nfcId);
+
+        user.Balance = user.Balance - Balance;
+        if (user.Balance < 0)
+        {
+            throw new Exception("Balance to low to execute the transaction");
+        }
+
+        await _userManager.UpdateAsync(user);
+
+        return user.Balance;
+    }
 }

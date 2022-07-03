@@ -475,6 +475,70 @@
         }
       }
     },
+    "/api/Users/TopUpBalance": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "Users_TopUpBalance",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopUpUserBalanceCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserBalanceVm"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Users/DeductBalance": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "Users_DeductBalance",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeductUserBalanceCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserBalanceVm"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/WeatherForecast": {
       "get": {
         "tags": [
@@ -767,6 +831,42 @@
             "type": "string"
           },
           "balance": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "UserBalanceVm": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "balance": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "TopUpUserBalanceCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "nfcId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "DeductUserBalanceCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "nfcId": {
+            "type": "string"
+          },
+          "amount": {
             "type": "number",
             "format": "decimal"
           }

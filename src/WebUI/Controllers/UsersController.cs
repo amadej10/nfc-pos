@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using nfc_pos.Application.Common;
+using nfc_pos.Application.Common.DeductUserBalance;
 using nfc_pos.Application.Common.Interfaces;
+using nfc_pos.Application.Common.TopUpUserBalance;
 using nfc_pos.Application.Users.Commands.CreateUser;
 using nfc_pos.Application.Users.Queries;
 
@@ -23,5 +26,18 @@ public class UsersController : ApiControllerBase
     public async Task<ActionResult<UserVm>> GetUserNameAndBalance([FromQuery] GetUserQuery query)
     {
         return await Mediator.Send(query);
+    }
+
+
+    [HttpPost("TopUpBalance")]
+    public async Task<ActionResult<UserBalanceVm>> TopUpBalance(TopUpUserBalanceCommand command)
+    {
+        return await Mediator.Send(command);
+    }
+
+    [HttpPost("DeductBalance")]
+    public async Task<ActionResult<UserBalanceVm>> DeductBalance(DeductUserBalanceCommand command)
+    {
+        return await Mediator.Send(command);
     }
 }
