@@ -580,6 +580,234 @@ export class TodoListsClient implements ITodoListsClient {
     }
 }
 
+export interface IUsersClient {
+    create(command: CreateUserCommand): Observable<string>;
+    getUserNameAndBalance(nfcId: string | null | undefined): Observable<UserVm>;
+    topUpBalance(command: TopUpUserBalanceCommand): Observable<UserBalanceVm>;
+    deductBalance(command: DeductUserBalanceCommand): Observable<UserBalanceVm>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class UsersClient implements IUsersClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    create(command: CreateUserCommand): Observable<string> {
+        let url_ = this.baseUrl + "/api/Users";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreate(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<string>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<string>;
+        }));
+    }
+
+    protected processCreate(response: HttpResponseBase): Observable<string> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    getUserNameAndBalance(nfcId: string | null | undefined): Observable<UserVm> {
+        let url_ = this.baseUrl + "/api/Users?";
+        if (nfcId !== undefined && nfcId !== null)
+            url_ += "NfcId=" + encodeURIComponent("" + nfcId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetUserNameAndBalance(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetUserNameAndBalance(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<UserVm>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<UserVm>;
+        }));
+    }
+
+    protected processGetUserNameAndBalance(response: HttpResponseBase): Observable<UserVm> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserVm.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    topUpBalance(command: TopUpUserBalanceCommand): Observable<UserBalanceVm> {
+        let url_ = this.baseUrl + "/api/Users/TopUpBalance";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processTopUpBalance(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processTopUpBalance(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<UserBalanceVm>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<UserBalanceVm>;
+        }));
+    }
+
+    protected processTopUpBalance(response: HttpResponseBase): Observable<UserBalanceVm> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserBalanceVm.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    deductBalance(command: DeductUserBalanceCommand): Observable<UserBalanceVm> {
+        let url_ = this.baseUrl + "/api/Users/DeductBalance";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDeductBalance(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDeductBalance(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<UserBalanceVm>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<UserBalanceVm>;
+        }));
+    }
+
+    protected processDeductBalance(response: HttpResponseBase): Observable<UserBalanceVm> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserBalanceVm.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
 export interface IWeatherForecastClient {
     get(): Observable<WeatherForecast[]>;
 }
@@ -1186,6 +1414,222 @@ export class UpdateTodoListCommand implements IUpdateTodoListCommand {
 export interface IUpdateTodoListCommand {
     id?: number;
     title?: string | undefined;
+}
+
+export class CreateUserCommand implements ICreateUserCommand {
+    email?: string;
+    password?: string;
+    name?: string;
+    surname?: string;
+    nfcId?: string | undefined;
+    description?: string | undefined;
+    balance?: number;
+
+    constructor(data?: ICreateUserCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.email = _data["email"];
+            this.password = _data["password"];
+            this.name = _data["name"];
+            this.surname = _data["surname"];
+            this.nfcId = _data["nfcId"];
+            this.description = _data["description"];
+            this.balance = _data["balance"];
+        }
+    }
+
+    static fromJS(data: any): CreateUserCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateUserCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["email"] = this.email;
+        data["password"] = this.password;
+        data["name"] = this.name;
+        data["surname"] = this.surname;
+        data["nfcId"] = this.nfcId;
+        data["description"] = this.description;
+        data["balance"] = this.balance;
+        return data;
+    }
+}
+
+export interface ICreateUserCommand {
+    email?: string;
+    password?: string;
+    name?: string;
+    surname?: string;
+    nfcId?: string | undefined;
+    description?: string | undefined;
+    balance?: number;
+}
+
+export class UserVm implements IUserVm {
+    fullName?: string;
+    balance?: number;
+
+    constructor(data?: IUserVm) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.fullName = _data["fullName"];
+            this.balance = _data["balance"];
+        }
+    }
+
+    static fromJS(data: any): UserVm {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserVm();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["fullName"] = this.fullName;
+        data["balance"] = this.balance;
+        return data;
+    }
+}
+
+export interface IUserVm {
+    fullName?: string;
+    balance?: number;
+}
+
+export class UserBalanceVm implements IUserBalanceVm {
+    balance?: number;
+
+    constructor(data?: IUserBalanceVm) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.balance = _data["balance"];
+        }
+    }
+
+    static fromJS(data: any): UserBalanceVm {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserBalanceVm();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["balance"] = this.balance;
+        return data;
+    }
+}
+
+export interface IUserBalanceVm {
+    balance?: number;
+}
+
+export class TopUpUserBalanceCommand implements ITopUpUserBalanceCommand {
+    nfcId?: string;
+    amount?: number;
+
+    constructor(data?: ITopUpUserBalanceCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.nfcId = _data["nfcId"];
+            this.amount = _data["amount"];
+        }
+    }
+
+    static fromJS(data: any): TopUpUserBalanceCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new TopUpUserBalanceCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["nfcId"] = this.nfcId;
+        data["amount"] = this.amount;
+        return data;
+    }
+}
+
+export interface ITopUpUserBalanceCommand {
+    nfcId?: string;
+    amount?: number;
+}
+
+export class DeductUserBalanceCommand implements IDeductUserBalanceCommand {
+    nfcId?: string;
+    amount?: number;
+
+    constructor(data?: IDeductUserBalanceCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.nfcId = _data["nfcId"];
+            this.amount = _data["amount"];
+        }
+    }
+
+    static fromJS(data: any): DeductUserBalanceCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new DeductUserBalanceCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["nfcId"] = this.nfcId;
+        data["amount"] = this.amount;
+        return data;
+    }
+}
+
+export interface IDeductUserBalanceCommand {
+    nfcId?: string;
+    amount?: number;
 }
 
 export class WeatherForecast implements IWeatherForecast {

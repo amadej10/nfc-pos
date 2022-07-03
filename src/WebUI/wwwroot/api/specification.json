@@ -414,6 +414,131 @@
         ]
       }
     },
+    "/api/Users": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "Users_Create",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "Users_GetUserNameAndBalance",
+        "parameters": [
+          {
+            "name": "NfcId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserVm"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Users/TopUpBalance": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "Users_TopUpBalance",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopUpUserBalanceCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserBalanceVm"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Users/DeductBalance": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "Users_DeductBalance",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeductUserBalanceCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserBalanceVm"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/WeatherForecast": {
       "get": {
         "tags": [
@@ -665,6 +790,85 @@
           "title": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "CreateUserCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "nfcId": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "balance": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "UserVm": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "UserBalanceVm": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "balance": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "TopUpUserBalanceCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "nfcId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "DeductUserBalanceCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "nfcId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal"
           }
         }
       },
